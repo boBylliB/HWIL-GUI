@@ -245,6 +245,7 @@ class DisplayPage(ttk.Frame):
 		self.image = ImageTk.PhotoImage(self.currentVideoFrame)
 		self.imageLabel = ttk.Label(self, image=self.image).pack()
 
+#Listener pulls in data from MATLAB
 HOST, DATAPORT = 'localhost', 50007
 def listener(main):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -266,6 +267,7 @@ def listener(main):
 				conn.sendall(b'0')
 	conn.close()
 
+#VideoListener pulls in video data specifically from MATLAB
 VIDEOPORT = 50008
 READSIZE = 1080000
 def videoListener(main):
@@ -283,7 +285,7 @@ def videoListener(main):
 		main.disp.loadImage(main, READSIZE)
 	conn.close()
 
-
+#DataDecoder takes the data read from MATLAB and converts it into usable values
 def dataDecoder(main):
 	while 1:
 		if not main.empty:
