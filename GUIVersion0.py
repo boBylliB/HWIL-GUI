@@ -37,6 +37,13 @@ class MainPage(ttk.Frame):
 		self.videoEmpty = self.videoQueue.empty()
 		self.currentVideoFrameSize += len(data)
 
+	def calculateVideoFrameSize(self):
+		self.currentVideoFrameSize = 0
+		for idx in range(self.videoQueue.qsize()):
+			data = self.getVideoData()
+			self.currentVideoFrameSize += len(data)
+			self.addData(data)
+
 	def getVideoData(self):
 		if not self.videoQueue.empty():
 			data = self.videoQueue.get()
@@ -211,7 +218,8 @@ class DisplayPage(ttk.Frame):
 		if main.currentVideoFrameSize >= frameSize:
 			img = bytearray()
 			pulledSize = 0
-			while not main.videoEmpty:
+			imageLoaded = False
+			while not main.videoEmpty and not imageLoaded:
 				vidData = main.getVideoData()
 				if pulledSize + len(vidData) >= frameSize:
 					#split vidData to size
@@ -225,8 +233,9 @@ class DisplayPage(ttk.Frame):
 					#print("Final frame is of size ", len(img))
 					self.currentVideoFrame = Image.frombytes("RGB",[600,600],bytes(img))
 					self.image = ImageTk.PhotoImage(self.currentVideoFrame)
-					self.imageLabel = ttk.Label(self, image=self.image)
-					pulledSize += len(vidData)
+					self.imageLabel = ttk.Label(self, image=self.image).pack()
+					imageLoaded = True
+					main.calculateVideoFrameSize()
 				else:
 					img.extend(bytearray(vidData))
 					pulledSize += len(vidData)
