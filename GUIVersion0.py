@@ -17,6 +17,7 @@ class MainPage(ttk.Frame):
 		self.ctrl = None
 		self.diag = None
 		self.disp = None
+		self.requestImageLoad = False
 		self.queue = Queue()
 		self.sendQueue = Queue()
 		self.videoQueue = Queue()
@@ -60,7 +61,14 @@ class MainPage(ttk.Frame):
 		self.diag = diag
 		diag.grid(row=1, column=0, columnspan=2)
 		ctrl.load()
-		disp.load("forklift.jpg")
+		disp.load("forklift600.jpg", self, READSIZE)
+
+	def updateImage(self, loadedImage):
+		if self.imageLabel == None:
+			self.imageLabel = ttk.Label(self, image=loadedImage).grid(column=1,row=0)
+			print ('reloading fully')
+		else:
+			self.imageLabel.configure(image = loadedImage)
 
 	def getData(self):
 		if not self.queue.empty():
@@ -209,10 +217,15 @@ class DisplayPage(ttk.Frame):
 		self.image = None
 		self.imageLabel = None
 
-	def load(self, filename):
+	def load(self, filename, main, frameSize):
 		placeholder = Image.open(filename)
 		self.image = ImageTk.PhotoImage(placeholder)
-		self.imageLabel = ttk.Label(self, image=self.image).pack()
+		if self.imageLabel == None:
+			self.imageLabel = ttk.Label(self, image=self.image).grid(column=1,row=0)
+			print ('reloading fully')
+		else:
+			self.imageLabel.configure(image = self.image)
+		disp.after(30, self.loadImage, main, frameSize)
 
 	def loadImage(self, main, frameSize):
 		if main.currentVideoFrameSize >= frameSize:
@@ -233,12 +246,17 @@ class DisplayPage(ttk.Frame):
 					#print("Final frame is of size ", len(img))
 					self.currentVideoFrame = Image.frombytes("RGB",[600,600],bytes(img))
 					self.image = ImageTk.PhotoImage(self.currentVideoFrame)
-					self.imageLabel = ttk.Label(self, image=self.image).pack()
+					if self.imageLabel == None:
+						self.imageLabel = ttk.Label(self, image=self.image).grid(column=1,row=0)
+						print ('reloading fully')
+					else:
+						self.imageLabel.configure(image = self.image)
 					imageLoaded = True
 					main.calculateVideoFrameSize()
 				else:
 					img.extend(bytearray(vidData))
 					pulledSize += len(vidData)
+		disp.after(30, self.loadImage, main, frameSize)
 
 
 #		img = bytearray()
@@ -252,7 +270,11 @@ class DisplayPage(ttk.Frame):
 	def loadImageManually(self, data):
 		self.currentVideoFrame = Image.frombytes("RGB",[600,600],data)
 		self.image = ImageTk.PhotoImage(self.currentVideoFrame)
-		self.imageLabel = ttk.Label(self, image=self.image).pack()
+		if self.imageLabel == None:
+			self.imageLabel = ttk.Label(self, image=self.image).grid(column=0,row=0)
+			print ('reloading fully')
+		else:
+			self.imageLabel.configure(image = self.image)
 
 #Listener pulls in data from MATLAB
 HOST, DATAPORT = 'localhost', 50007
@@ -265,7 +287,7 @@ def listener(main):
 	while 1:
 		data = conn.recv(256)
 		if not data: break
-		print ('Received data: ', data)
+		print ('Received data of size ', len(data))
 		main.addData(data)
 		main.queueData(data)
 		while not main.sendEmpty:
@@ -291,7 +313,6 @@ def videoListener(main):
 		if not data: break
 		print ('Received video data of size ', len(data))
 		main.addVideoData(data)
-		main.disp.loadImage(main, READSIZE)
 	conn.close()
 
 #DataDecoder takes the data read from MATLAB and converts it into usable values
