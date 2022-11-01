@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter import ttk
-from tkinterweb import HtmlFrame
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (FigureCanvasTkAgg, NavigationToolbar2Tk)
 from PIL import Image, ImageTk
