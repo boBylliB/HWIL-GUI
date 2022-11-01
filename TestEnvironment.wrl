@@ -1,0 +1,25 @@
+#VRML V2.0 utf8
+
+Background {
+}
+Script {
+}
+DEF cube Transform {
+  rotation 0 0 0 0
+  children Transform {
+    children Shape {
+      appearance Appearance {
+        texture ImageTexture {
+          url "C:/Users/jrsan/Pictures/1loE2ws__400x400.jpg" 
+        }
+        material Material {
+          diffuseColor 0.8 0 0.2
+        }
+      }
+      geometry Box {
+      }
+    }
+  }
+}
+Viewpoint {
+}
