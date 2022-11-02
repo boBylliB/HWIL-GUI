@@ -310,7 +310,7 @@ def listener(main):
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
-VIDEOPORT = 50008
+VIDEOPORT = 50080
 READSIZE = 1080000
 def videoListener(main):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -331,7 +331,7 @@ def dataDecoder(main):
 	while 1:
 		if not main.empty:
 			data = main.getData()
-			if not data == None:
+			if not data == None and len(data)==256:
 				print('Decoding data: ', data)
 				time, ecc, smaxis, inc, longasc, argper, tanom, attx, atty, attz, mode, sunex, powgen, powdraw, batv, batc, world, excess = str(data).split(',')
 				main.ctrl.setTime(float(time.replace('b','').replace('\'','')))
