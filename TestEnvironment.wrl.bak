@@ -10,7 +10,7 @@ DEF cube Transform {
     children Shape {
       appearance Appearance {
         texture ImageTexture {
-          url "gooseknife.jpg" 
+          url "C:/Users/jrsan/Pictures/1loE2ws__400x400.jpg" 
         }
         material Material {
           diffuseColor 0.8 0 0.2

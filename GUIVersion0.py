@@ -243,7 +243,18 @@ class DisplayPage(ttk.Frame):
 					main.addVideoData(tempArr)
 					#actually load image
 					#print("Final frame is of size ", len(img))
-					self.currentVideoFrame = Image.frombytes("RGB",[600,600],bytes(img))
+					h,w = 600,600
+					bpc = h*w
+					# Make a Numpy array for each channel's pixels
+					R = np.frombuffer(img, dtype=np.uint8, count=bpc).reshape((h,w))  
+					G = np.frombuffer(img, dtype=np.uint8, count=bpc, offset=bpc).reshape((h,w))  
+					B = np.frombuffer(img, dtype=np.uint8, count=bpc, offset=2*bpc).reshape((h,w))
+
+					# Interleave the pixels from RRRRRRGGGGGGBBBBBB to RGBRGBRGBRGBRGB
+					RGB = np.dstack((R,G,B))
+
+					# Make PIL Image from Numpy array
+					self.currentVideoFrame = Image.fromarray(RGB)
 					self.image = ImageTk.PhotoImage(self.currentVideoFrame)
 					if self.imageLabel == None:
 						self.imageLabel = ttk.Label(self, image=self.image).grid(column=1,row=0)
