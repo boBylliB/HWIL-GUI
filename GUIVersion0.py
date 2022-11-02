@@ -331,7 +331,7 @@ def dataDecoder(main):
 	while 1:
 		if not main.empty:
 			data = main.getData()
-			if not data == None and len(data) > 1:
+			if not data == None:
 				print('Decoding data: ', data)
 				time, ecc, smaxis, inc, longasc, argper, tanom, attx, atty, attz, mode, sunex, powgen, powdraw, batv, batc, world, excess = str(data).split(',')
 				main.ctrl.setTime(float(time.replace('b','').replace('\'','')))
