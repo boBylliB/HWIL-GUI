@@ -24,8 +24,8 @@ class MainPage(ttk.Frame):
 		self.empty = True
 		self.videoEmpty = True
 		self.sendEmpty = True
-
 #   BELLO
+#   BELLO indeed
 #	def changeState(self,text):
 #		self.state_lbl['text'] = text
 
