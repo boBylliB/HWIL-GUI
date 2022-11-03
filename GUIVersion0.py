@@ -247,9 +247,9 @@ class DisplayPage(ttk.Frame):
 					h,w = 600,600
 					bpc = h*w
 					# Make a Numpy array for each channel's pixels
-					R = np.frombuffer(img, dtype=np.uint8, count=bpc).reshape((h,w))  
-					G = np.frombuffer(img, dtype=np.uint8, count=bpc, offset=bpc).reshape((h,w))  
-					B = np.frombuffer(img, dtype=np.uint8, count=bpc, offset=2*bpc).reshape((h,w))
+					R = np.ndarray.transpose(np.frombuffer(img, dtype=np.uint8, count=bpc).reshape((h,w)))
+					G = np.ndarray.transpose(np.frombuffer(img, dtype=np.uint8, count=bpc, offset=bpc).reshape((h,w)))
+					B = np.ndarray.transpose(np.frombuffer(img, dtype=np.uint8, count=bpc, offset=2*bpc).reshape((h,w)))
 
 					# Interleave the pixels from RRRRRRGGGGGGBBBBBB to RGBRGBRGBRGBRGB
 					RGB = np.dstack((R,G,B))
