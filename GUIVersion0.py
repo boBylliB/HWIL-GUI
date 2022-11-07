@@ -76,7 +76,7 @@ class MainPage(ttk.Frame):
 		ctrl.load()
 		disp.load("forklift600.jpg", self, READSIZE)
 
-	# Updates the image within hte subframe for video
+	# Updates the image within the subframe for video
 	# This is what changes the forklift picture to something else
 	def updateImage(self, loadedImage):
 		if self.imageLabel == None:
