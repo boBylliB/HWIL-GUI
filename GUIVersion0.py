@@ -299,7 +299,7 @@ class DisplayPage(ttk.Frame):
 				else:
 					img.extend(bytearray(vidData))
 					pulledSize += len(vidData)
-		disp.after(30, self.loadImage, main, frameSize)
+		disp.after(1, self.loadImage, main, frameSize)
 
 
 #		img = bytearray()
