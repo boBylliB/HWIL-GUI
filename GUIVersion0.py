@@ -11,6 +11,7 @@ import threading
 import socket
 
 # class for the GUI itself
+# holds each section of the GUI within itself, and acts to bridge the gap and hold utility functions
 class MainPage(ttk.Frame):
 	def __init__(self, *args, **kwargs):
 		super().__init__(**kwargs)
@@ -31,29 +32,30 @@ class MainPage(ttk.Frame):
 #		self.state_lbl['text'] = text
 
 
-	# Adding data to the queue
+	# Adding data to the queue, for any received numeric data
 	def addData(self,data):
 		self.queue.put(data)
 		self.empty = self.queue.empty()
 
-	# Adding data to video queue
+	# Adding data to video queue, solely used for receiving video frames from the simulink animation
 	def addVideoData(self,data):
 		self.videoQueue.put(data)
 		self.videoEmpty = self.videoQueue.empty()
 		self.currentVideoFrameSize += len(data)
 
 
-	# Calculating how large a video frame will be
+	# Calculating how large the current video queue would be if read as a single frame
+	# Used to compare to the desired video frame size
 	def calculateVideoFrameSize(self):
 		self.currentVideoFrameSize = 0
-		# Loops through video queue, gets qsize (a thing from the GUI library)
+		# Loops through each entry in the video queue, and sums up the total video data size
 		for idx in range(self.videoQueue.qsize()):
 			data = self.getVideoData()
 			self.currentVideoFrameSize += len(data)
 			self.addData(data)
 
 
-	# Getting video data
+	# Retrieve video data from queue
 	def getVideoData(self):
 		# Making sure that the video queue is not empty
 		if not self.videoQueue.empty():
@@ -66,6 +68,7 @@ class MainPage(ttk.Frame):
 		self.videoEmpty = self.videoQueue.empty()
 
 	# Loading frames within frames, essentially the video screen and the other parts
+	# Used for initializing anything required for the subframes to function
 	def loadSubFrames(self,ctrl,diag,disp):
 		self.disp = disp
 		self.disp.grid(row=0, column=1)
@@ -85,28 +88,29 @@ class MainPage(ttk.Frame):
 		else:
 			self.imageLabel.configure(image = loadedImage)
 	
-	# Get data from the queue
+	# Get numeric data from the queue of received data
 	def getData(self):
 		if not self.queue.empty():
 			return self.queue.get()
 		self.empty = self.queue.empty()
 
-	# Checks if queue is empty
+	# Checks if the received data queue is empty
 	def checkEmpty(self):
 		return self.queue.empty()
 
-	# Adds data to the queue,
+	# Adds received data to the queue
 	def queueData(self, data):
 		self.sendQueue.put(data)
 		self.sendEmpty = self.sendQueue.empty()
 
-	# returns data queue if it isn't empty
+	# Used for sending data back to simulink, if the send queue isn't empty it'll return the next item of data to send
 	def sendData(self):
 		if not self.sendQueue.empty():
 			return self.sendQueue.get()
 		self.sendEmpty = self.sendQueue.empty()
 
 # The control part of the GUI
+# Used for entering initial values and controlling the simulation from the GUI
 class ControlPage(ttk.Frame):
 	def __init__(self, *args, **kwargs):
 		super().__init__(**kwargs)
@@ -137,7 +141,7 @@ class ControlPage(ttk.Frame):
 		print ('stop simulation')
 
 
-	# Sets time, displays according to correct unit
+	# Sets time, then autoscales to an easy-to-read unit based on the size
 	def setTime(self, time):
 		self.time = time
 		if time < 300:
@@ -152,7 +156,7 @@ class ControlPage(ttk.Frame):
 		if not self.timeLabel == None:
 			self.timeLabel['text'] = 'Runtime: ' + self.displayTime + self.units
 
-	# Sets perams for orbital stuff, just passes in all the variables
+	# Sets params for orbital stuff directly, just passes in all the variables
 	def setOrbitalParameters(self, Eccentricity, SemiMajorAxis, Inclination, LongitudeAscending, ArgumentPeriapsis, TrueAnomaly):
 		self.Eccentricity.set(Eccentricity)
 		self.SemiMajorAxis.set(SemiMajorAxis)
@@ -161,13 +165,13 @@ class ControlPage(ttk.Frame):
 		self.ArgumentPeriapsis.set(ArgumentPeriapsis)
 		self.TrueAnomaly.set(TrueAnomaly)
 
-	# Sets given attribute
+	# Sets the stored attitude of the satellite to given values
 	def setAttitude(self, attx, atty, attz):
 		self.attitudeX.set(attx)
 		self.attitudeY.set(atty)
 		self.attitudeZ.set(attz)
 
-	# Leads the GUI itself, and eventually values?
+	# Initializes the control page of the GUI, building all of the buttons, labels, and entry fields
 	def load(self):
 		# Left Buttons
 		ttk.Button(self, text="Save", command=self.save).grid(column=0, row=0, sticky=W)
@@ -200,7 +204,8 @@ class ControlPage(ttk.Frame):
 		ttk.Label(self, text="").grid(column=0, row=14) # Spacer
 		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=15, columnspan=3)
 
-# Diagnositcs page class
+# The diagnostics part of the GUI
+# Used for viewing relevant data and statistics while the simulation is running
 class DiagnosticsPage(ttk.Frame):
 	def __init__(self, *args, **kwargs):
 		super().__init__(**kwargs)
@@ -212,7 +217,7 @@ class DiagnosticsPage(ttk.Frame):
 		self.voltage = ttk.Label(self, text="Battery Voltage = 0 V").grid(column=2, row=1)
 		self.chargePercent = ttk.Label(self, text="Estimated Charge = 0 %").grid(column=2, row=0, sticky=E)
 
-	# Setter functions for all Diagnositcs
+	# Setter functions for all Diagnostics
 
 	def setMode(self, mode):
 		if not self.mode == None:
@@ -238,7 +243,8 @@ class DiagnosticsPage(ttk.Frame):
 		if not self.chargePercent == None:
 			self.chargePercent['text'] = 'Estimated Charge = ' + str(chargePercent) + ' %'
 
-# DisplayPage class
+# The video part of the GUI
+# Used for reading in and displaying the animation sent directly from simulink
 HEIGHT, WIDTH = 600, 600
 class DisplayPage(ttk.Frame):
 	def __init__(self, *args, **kwargs):
@@ -247,7 +253,7 @@ class DisplayPage(ttk.Frame):
 		self.image = None
 		self.imageLabel = None
 
-	# Loads the initial state of the GUI
+	# Loads the initial state of the display page, using a given placeholder image
 	def load(self, filename, main, frameSize):
 		placeholder = Image.open(filename)
 		self.image = ImageTk.PhotoImage(placeholder)
@@ -258,7 +264,10 @@ class DisplayPage(ttk.Frame):
 			self.imageLabel.configure(image = self.image)
 		disp.after(30, self.loadImage, main, frameSize)
 	
-	# Loads an image, after unserilizing and reserilizing, Image manipulation can happen here as well
+	# Loads an image from the video queue
+	# This function will schedule itself to run, so it should ONLY BE CALLED ONCE
+	# Once it is called, it will continue to call itself and attempt to load images from the video queue
+	# Hence why it begins by checking whether or not the video queue has enough data to load an image
 	def loadImage(self, main, frameSize):
 		if main.currentVideoFrameSize >= frameSize:
 			img = bytearray()
@@ -275,7 +284,8 @@ class DisplayPage(ttk.Frame):
 					#put excess back into queue
 					main.addVideoData(tempArr)
 					#actually load image
-					#print("Final frame is of size ", len(img))
+					#the following numpy code exists because simulink sends video data as RGB, interleaved by row of pixels
+					#why simulink does this I don't know, wish it didn't, but it is what it is
 					h,w = 600,600
 					bpc = h*w
 					# Make a Numpy array for each channel's pixels
@@ -289,6 +299,7 @@ class DisplayPage(ttk.Frame):
 					# Make PIL Image from Numpy array
 					self.currentVideoFrame = Image.fromarray(RGB)
 					self.image = ImageTk.PhotoImage(self.currentVideoFrame)
+					# Load the PIL image into the image display label
 					if self.imageLabel == None:
 						self.imageLabel = ttk.Label(self, image=self.image).grid(column=1,row=0)
 						print ('reloading fully')
@@ -299,7 +310,12 @@ class DisplayPage(ttk.Frame):
 				else:
 					img.extend(bytearray(vidData))
 					pulledSize += len(vidData)
-		disp.after(1, self.loadImage, main, frameSize)
+		# Schedules itself to run again, with the same input data
+		# The first argument is the amount of milliseconds to wait before calling itself again
+		# TODO:
+		# - Tweak the first argument to strike a balance between not calling itself too often and maximizing framerate
+		# - If needed, create a test or something in order to be able to stop this function from running instead of closing python
+		disp.after(10, self.loadImage, main, frameSize)
 
 
 #		img = bytearray()
@@ -310,7 +326,7 @@ class DisplayPage(ttk.Frame):
 #			self.currentVideoFrame = Image.frombytes("RGB",[600,600],bytes(img))
 #			self.image = ImageTk.PhotoImage(self.currentVideoFrame)
 
-	# Loading the image the hard way
+	# Loading the image the manual/hard way, only intended for debugging
 	def loadImageManually(self, data):
 		self.currentVideoFrame = Image.frombytes("RGB",[600,600],data)
 		self.image = ImageTk.PhotoImage(self.currentVideoFrame)
@@ -336,11 +352,13 @@ def listener(main):
 		data = conn.recv(256)
 		if not data: break
 		# If this returns anything other than 256, bad things happen
+		# Can potentially change the size of data received, but 256 is relatively standard and should be enough for now
 		print ('Received data of size ', len(data))
-		# Adds in data recived from connection
+		# Adds in data received from connection to the received data queue
 		main.addData(data)
 		main.queueData(data)
 		# Sends all data in sendData queue
+		# If simulink expects to receive data, you NEED to send data, hence why there's a 0 byte in case the send queue is empty
 		while not main.sendEmpty:
 			sendData = main.sendData()
 			if not sendData == None:
@@ -350,6 +368,8 @@ def listener(main):
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
+#host address should be the same, but the port will be different
+#readsize might change, but should be: height * width * 3
 VIDEOPORT = 50080
 READSIZE = 1080000
 
@@ -364,7 +384,7 @@ def videoListener(main):
 	# Prints connecting address
 	print ('Connected by ', addr, ' for video')
 	totalSize = 0;
-	# Reads given data
+	# Reads and queues video data
 	while 1:
 		data = conn.recv(READSIZE)
 		if not data: break
@@ -373,6 +393,8 @@ def videoListener(main):
 	conn.close()
 
 #DataDecoder takes the data read from MATLAB and converts it into usable values
+#This could also potentially schedule helper functions, if you receive data that needs math done
+#However math should be scheduled or limited in scope to make this function run as fast as possible so as to limit bottlenecks
 def dataDecoder(main):
 	while 1:
 		if not main.empty:
@@ -391,20 +413,23 @@ def dataDecoder(main):
 				main.diag.setChargePercent(float(batc))
 
 
-# General GUI variables
+# Pretty standard GUI setup, similar to most other tkinter GUIs
 root = Tk()
-root.title("EagleSat Simulation Interface")
+root.title("EagleSat Simulation Interface") # Set the window title
 
+# Create a MainPage class and set it to reference the root frame
 main = MainPage(root)
-main.grid()
-root.wm_geometry("1000x800")
+main.grid() # The organization function I'm using is grid, this initializes it
+root.wm_geometry("1000x800") # Set the initial window size
 
+# Create the subframes of the main frame
 ctrl = ControlPage(main)
 diag = DiagnosticsPage(main)
 disp = DisplayPage(main)
 
 main.loadSubFrames(ctrl,diag,disp)
 
+# Starting the listener and decoding threads
 dataThread = threading.Thread(target=listener, args=(main, ))
 dataThread.daemon = True
 dataThread.start()
@@ -417,4 +442,5 @@ videoThread = threading.Thread(target=videoListener, args=(main, ))
 videoThread.daemon = True
 videoThread.start()
 
+# Begin the tkinter loop, which simply activates the GUI functionality
 root.mainloop()
