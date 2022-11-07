@@ -211,11 +211,11 @@ class DiagnosticsPage(ttk.Frame):
 		super().__init__(**kwargs)
 		# StringVars for displaying
 		self.mode = StringVar(self, "Mode: Not Running")
-		self.sunExposure = StringVar(self, "Sun Exposure = 0 %")
-		self.powerGeneration = StringVar(self, "Power Generation = 0 W")
-		self.powerDraw = StringVar(self, "Power Draw = 0 W")
-		self.voltage = StringVar(self, "Battery Voltage = 0 V")
-		self.chargePercent = StringVar(self, "Estimated Charge = 0 %")
+		self.sunExposure = StringVar(self, "Sun Exposure = ?")
+		self.powerGeneration = StringVar(self, "Power Generation = ?")
+		self.powerDraw = StringVar(self, "Power Draw = ?")
+		self.voltage = StringVar(self, "Battery Voltage = ?")
+		self.chargePercent = StringVar(self, "Estimated Charge = ?")
 		# Displayed Readouts
 		ttk.Label(self, textvariable=self.mode).grid(column=0, row=0, sticky=W)
 		ttk.Label(self, textvariable=self.sunExposure).grid(column=1, row=0)
