@@ -209,39 +209,40 @@ class ControlPage(ttk.Frame):
 class DiagnosticsPage(ttk.Frame):
 	def __init__(self, *args, **kwargs):
 		super().__init__(**kwargs)
-		# Numerical Readouts
-		self.mode = ttk.Label(self, text="Mode: Not Running").grid(column=0, row=0, sticky=W)
-		self.sunExposure = ttk.Label(self, text="Sun Exposure = 0 %").grid(column=1, row=0)
-		self.powerGeneration = ttk.Label(self, text="Power Generation = 0 W").grid(column=0, row=1, sticky=E)
-		self.powerDraw = ttk.Label(self, text="Power Draw = 0 W").grid(column=1, row=1, sticky=W)
-		self.voltage = ttk.Label(self, text="Battery Voltage = 0 V").grid(column=2, row=1)
-		self.chargePercent = ttk.Label(self, text="Estimated Charge = 0 %").grid(column=2, row=0, sticky=E)
+		# StringVars for displaying
+		self.mode = StringVar(self, "Mode: Not Running")
+		self.sunExposure = StringVar(self, "Sun Exposure = 0 %")
+		self.powerGeneration = StringVar(self, "Power Generation = 0 W")
+		self.powerDraw = StringVar(self, "Power Draw = 0 W")
+		self.voltage = StringVar(self, "Battery Voltage = 0 V")
+		self.chargePercent = StringVar(self, "Estimated Charge = 0 %")
+		# Displayed Readouts
+		ttk.Label(self, textvariable=self.mode).grid(column=0, row=0, sticky=W)
+		ttk.Label(self, textvariable=self.sunExposure).grid(column=1, row=0)
+		ttk.Label(self, textvariable=self.powerGeneration).grid(column=0, row=1, sticky=E)
+		ttk.Label(self, textvariable=self.powerDraw).grid(column=1, row=1, sticky=W)
+		ttk.Label(self, textvariable=self.voltage).grid(column=2, row=1)
+		ttk.Label(self, textvariable=self.chargePercent).grid(column=2, row=0, sticky=E)
 
 	# Setter functions for all Diagnostics
 
 	def setMode(self, mode):
-		if not self.mode == None:
-			self.mode['text'] = 'Mode: ' + str(mode)
+		self.mode = "Mode: " + str(mode)
 
 	def setSunExposure(self, sunExposure):
-		if not self.sunExposure == None:
-			self.sunExposure['text'] = 'Sun Exposure = ' + str(sunExposure) + ' %'
+		self.sunExposure = 'Sun Exposure = ' + str(sunExposure) + ' %'
 
 	def setPowerGeneration(self, powerGeneration):
-		if not self.powerGeneration == None:
-			self.powerGeneration['text'] = 'Power Generation = ' + str(powerGeneration) + ' W'
+		self.powerGeneration = 'Power Generation = ' + str(powerGeneration) + ' W'
 
 	def setPowerDraw(self, powerDraw):
-		if not self.powerDraw == None:
-			self.powerDraw['text'] = 'Power Draw = ' + str(powerDraw) + ' W'
+		self.powerDraw = 'Power Draw = ' + str(powerDraw) + ' W'
 
 	def setVoltage(self, voltage):
-		if not self.voltage == None:
-			self.voltage['text'] = 'Battery Voltage = ' + str(voltage) + ' V'
+		self.voltage = 'Battery Voltage = ' + str(voltage) + ' V'
 
 	def setChargePercent(self, chargePercent):
-		if not self.chargePercent == None:
-			self.chargePercent['text'] = 'Estimated Charge = ' + str(chargePercent) + ' %'
+		self.chargePercent = 'Estimated Charge = ' + str(chargePercent) + ' %'
 
 # The video part of the GUI
 # Used for reading in and displaying the animation sent directly from simulink
