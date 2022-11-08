@@ -9,6 +9,7 @@ import numpy as np
 import datetime
 import threading
 import socket
+import csv
 
 # class for the GUI itself
 # holds each section of the GUI within itself, and acts to bridge the gap and hold utility functions
