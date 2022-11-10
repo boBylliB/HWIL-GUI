@@ -366,7 +366,7 @@ def listener(main):
 			if not sendData == None:
 				conn.sendall(bytes(sendData))
 			else:
-				conn.sendall(b'0')
+				conn.sendall(bytes(0))
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
