@@ -27,8 +27,6 @@ class MainPage(ttk.Frame):
 		self.empty = True
 		self.videoEmpty = True
 		self.sendEmpty = True
-#   BELLO
-#   BELLO indeed
 #	def changeState(self,text):
 #		self.state_lbl['text'] = text
 
@@ -130,10 +128,28 @@ class ControlPage(ttk.Frame):
 		self.displayTime = None
 		self.units = None
 		self.timeLabel = None
+		
+	def csv(self):
+		# Column headers for csv file
+		fields = ['Eccentricity', 'Semi Major Axis', 'Inclination', 'Longitude Ascending', 'Argument Periapsis', 'True Anomaly']
+		# Data Definition
+		rows = [self.Eccentricity.get(), self.SemiMajorAxis.get(), self.Inclination.get(), self.LongitudeAscending.get(), 
+		self.ArgumentPeriapsis.get(), self.TrueAnomaly.get()]
+		# name of CSV file
+		filename = 'ControlPage.csv'
+		# writing csv file
+		with open(filename, 'w') as csvfile:
+			csvwriter = csv.writer(csvfile)
+			# writing the fields (column)
+			csvwriter.writerow(fields)
+			# writing the data rows
+			csvwriter.writerow(rows)
+			
 
 	# TODO: Add functionality
 	def save(self):
 		print ('save file')
+		self.csv()
 
 	def start(self):
 		print ('start simulation')
@@ -205,6 +221,7 @@ class ControlPage(ttk.Frame):
 		ttk.Label(self, text="").grid(column=0, row=14) # Spacer
 		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=15, columnspan=3)
 
+
 # The diagnostics part of the GUI
 # Used for viewing relevant data and statistics while the simulation is running
 class DiagnosticsPage(ttk.Frame):
@@ -253,7 +270,7 @@ class DisplayPage(ttk.Frame):
 		super().__init__(**kwargs)
 		self.currentVideoFrame = None
 		self.image = None
-		self.imageLabel = None
+		self.imageLabel = None	
 
 	# Loads the initial state of the display page, using a given placeholder image
 	def load(self, filename, main, frameSize):
@@ -318,7 +335,6 @@ class DisplayPage(ttk.Frame):
 		# - Tweak the first argument to strike a balance between not calling itself too often and maximizing framerate
 		# - If needed, create a test or something in order to be able to stop this function from running instead of closing python
 		disp.after(10, self.loadImage, main, frameSize)
-
 
 #		img = bytearray()
 #		while not main.videoEmpty and main.currentVideoFrameSize < frameSize:
@@ -413,8 +429,7 @@ def dataDecoder(main):
 				main.diag.setPowerDraw(float(powdraw))
 				main.diag.setVoltage(float(batv))
 				main.diag.setChargePercent(float(batc))
-
-
+			
 # Pretty standard GUI setup, similar to most other tkinter GUIs
 root = Tk()
 root.title("EagleSat Simulation Interface") # Set the window title
