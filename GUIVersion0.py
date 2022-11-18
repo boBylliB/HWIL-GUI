@@ -128,29 +128,40 @@ class ControlPage(ttk.Frame):
 		self.displayTime = None
 		self.units = None
 		self.timeLabel = None
-		
-	def csv(self):
+	
+	# Control Page save functionality	
+	def Control_csv(self):
 		# Column headers for csv file
-		fields = ['Eccentricity', 'Semi Major Axis', 'Inclination', 'Longitude Ascending', 'Argument Periapsis', 'True Anomaly']
+		Control_fields = ['Eccentricity', 'Semi Major Axis', 'Inclination', 'Longitude Ascending', 'Argument Periapsis', 'True Anomaly']
 		# Data Definition
-		rows = [self.Eccentricity.get(), self.SemiMajorAxis.get(), self.Inclination.get(), self.LongitudeAscending.get(), 
+		Control_rows = [self.Eccentricity.get(), self.SemiMajorAxis.get(), self.Inclination.get(), self.LongitudeAscending.get(), 
 		self.ArgumentPeriapsis.get(), self.TrueAnomaly.get()]
 		# name of CSV file
-		filename = 'ControlPage.csv'
+		Control_filename = 'ControlPage.csv'
 		# writing csv file
-		with open(filename, 'w') as csvfile:
+		with open(Control_filename, 'w') as csvfile:
 			csvwriter = csv.writer(csvfile)
 			# writing the fields (column)
-			csvwriter.writerow(fields)
+			csvwriter.writerow(Control_fields)
 			# writing the data rows
-			csvwriter.writerow(rows)
+			csvwriter.writerow(Control_rows)
+	
+	# Attitude save functionality
+	def Attitude_csv(self):
+		# Column headers for csv file
+		Attitude_fields = ['Attitude X', 'Attitude Y', 'Attitude Z']
+		# Data Definition
+		Attitude_rows = [self.attitudeX.get(), self.attitudeY.get(), self.attitudeZ.get()]
+		# name of CSV file
+		Attitude_filename = 'ControlPage.csv'
+		# writing csv file
+		with open(Attitude_filename, 'w') as csvfile:
+			csvwriter = csv.writer(csvfile)
+			# writing the fields (column)
+			csvwriter.writerow(Attitude_fields)
+			# writing the data rows
+			csvwriter.writerow(Attitude_rows)				
 			
-
-	# TODO: Add functionality
-	def save(self):
-		print ('save file')
-		self.csv()
-
 	def start(self):
 		print ('start simulation')
 
@@ -241,6 +252,23 @@ class DiagnosticsPage(ttk.Frame):
 		ttk.Label(self, textvariable=self.powerDraw).grid(column=1, row=1, sticky=W)
 		ttk.Label(self, textvariable=self.voltage).grid(column=2, row=1)
 		ttk.Label(self, textvariable=self.chargePercent).grid(column=2, row=0, sticky=E)
+	
+	# Diagnostics save functionality
+	def Diagnostics_csv(self):
+		# Column headers for csv file
+		Diagnostics_fields = ['Mode', 'Sun Exposure', 'Power Generation', 'Power Draw', 'Voltage', 'Charge Percent']
+		# Data Definition
+		Diagnostics_rows = [self.mode.get(), self.sunExposure.get(), self.powerGeneration.get(), self.powerDraw.get(), self.voltage.get(),
+		self.chargePercent.get()]
+		# name of CSV file
+		Diagnostics_filename = 'ControlPage.csv'
+		# writing csv file
+		with open(Diagnostics_filename, 'w') as csvfile:
+			csvwriter = csv.writer(csvfile)
+			# writing the fields (column)
+			csvwriter.writerow(Diagnostics_fields)
+			# writing the data rows
+			csvwriter.writerow(Diagnostics_rows)		
 
 	# Setter functions for all Diagnostics
 
@@ -262,6 +290,13 @@ class DiagnosticsPage(ttk.Frame):
 	def setChargePercent(self, chargePercent):
 		self.chargePercent = 'Estimated Charge = ' + str(chargePercent) + ' %'
 
+	# TODO: Add functionality
+	def save(self):
+		print ('save file')
+		ctrl.Control_csv()
+		ctrl.Attitude_csv()
+		self.Diagnostics_csv()
+	
 # The video part of the GUI
 # Used for reading in and displaying the animation sent directly from simulink
 HEIGHT, WIDTH = 600, 600
