@@ -75,7 +75,7 @@ class MainPage(ttk.Frame):
 		ctrl.grid(row=0, column=0)
 		self.diag = diag
 		diag.grid(row=1, column=0, columnspan=2)
-		ctrl.load()
+		ctrl.load(self)
 		disp.load("forklift600.jpg", self, READSIZE)
 
 	# Updates the image within the subframe for video
@@ -96,6 +96,20 @@ class MainPage(ttk.Frame):
 	# Checks if the received data queue is empty
 	def checkEmpty(self):
 		return self.queue.empty()
+
+	def updateMatlab(self, *args):
+		# Limit selfChanges from ever going below 0 if there's an error
+		if self.ctrl.selfChanges < 0:
+			self.ctrl.selfChanges = 0
+		# If selfChanges == 0, then the change was made by the user at runtime
+		if self.ctrl.selfChanges == 0:
+			# Build dataset in the same format as the received dataset
+			dataString = str(self.ctrl.Eccentricity.get()) + "," + str(self.ctrl.SemiMajorAxis.get()) + "," + str(self.ctrl.Inclination.get()) + "," + str(self.ctrl.LongitudeAscending.get()) + "," + str(self.ctrl.ArgumentPeriapsis.get()) + "," + str(self.ctrl.TrueAnomaly.get()) + "," + str(self.ctrl.attitudeX.get()) + "," + str(self.ctrl.attitudeY.get()) + "," + str(self.ctrl.attitudeZ.get())
+			# Convert to bytes and queue it
+			data = bytes(dataString)
+			queueData(data)
+		else:
+			self.ctrl.selfChanges -= 1
 
 	# Adds received data to the queue
 	def queueData(self, data):
@@ -120,14 +134,17 @@ class ControlPage(ttk.Frame):
 		self.LongitudeAscending = StringVar()
 		self.ArgumentPeriapsis = StringVar()
 		self.TrueAnomaly = StringVar()
-		# Attitude and Simulation Time
+		# Attitude
 		self.attitudeX = StringVar()
 		self.attitudeY = StringVar()
 		self.attitudeZ = StringVar()
+		# Simulation Time
 		self.time = 0
 		self.displayTime = None
 		self.units = None
 		self.timeLabel = None
+		# Flag for when a stringvar is changed by a set function instead of the user
+		self.selfChanges = 0
 	
 	# Control Page save functionality	
 	def Control_csv(self):
@@ -161,13 +178,17 @@ class ControlPage(ttk.Frame):
 			csvwriter.writerow(Attitude_fields)
 			# writing the data rows
 			csvwriter.writerow(Attitude_rows)				
-			
+	
+	# Placeholder save function, is this correct?
+	def save(self):
+		Control_csv()
+		Attitude_csv()
+
 	def start(self):
 		print ('start simulation')
 
 	def stop(self):
 		print ('stop simulation')
-
 
 	# Sets time, then autoscales to an easy-to-read unit based on the size
 	def setTime(self, time):
@@ -182,10 +203,12 @@ class ControlPage(ttk.Frame):
 			self.units = ' hours'
 			self.displayTime = str(self.time / 3600)
 		if not self.timeLabel == None:
+			self.selfChanges += 1 # Ignore 1 StringVar change
 			self.timeLabel['text'] = 'Runtime: ' + self.displayTime + self.units
 
 	# Sets params for orbital stuff directly, just passes in all the variables
 	def setOrbitalParameters(self, Eccentricity, SemiMajorAxis, Inclination, LongitudeAscending, ArgumentPeriapsis, TrueAnomaly):
+		self.selfChanges += 6 # Ignore 6 StringVar changes
 		self.Eccentricity.set(Eccentricity)
 		self.SemiMajorAxis.set(SemiMajorAxis)
 		self.Inclination.set(Inclination)
@@ -195,12 +218,13 @@ class ControlPage(ttk.Frame):
 
 	# Sets the stored attitude of the satellite to given values
 	def setAttitude(self, attx, atty, attz):
+		self.selfChanges += 3 # Ignore 3 StringVar changes
 		self.attitudeX.set(attx)
 		self.attitudeY.set(atty)
 		self.attitudeZ.set(attz)
 
 	# Initializes the control page of the GUI, building all of the buttons, labels, and entry fields
-	def load(self):
+	def load(self, main):
 		# Left Buttons
 		ttk.Button(self, text="Save", command=self.save).grid(column=0, row=0, sticky=W)
 		ttk.Button(self, text="Start", command=self.start).grid(column=1, row=0, sticky=E)
@@ -231,6 +255,17 @@ class ControlPage(ttk.Frame):
 		ttk.Entry(self, width=10, textvariable=self.attitudeZ).grid(column=2, row=13, sticky=W)
 		ttk.Label(self, text="").grid(column=0, row=14) # Spacer
 		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=15, columnspan=3)
+
+		# Setting up StringVar callbacks
+#		self.Eccentricity.trace('w', main.updateMatlab)
+#		self.SemiMajorAxis.trace('w', main.updateMatlab)
+#		self.Inclination.trace('w', main.updateMatlab)
+#		self.LongitudeAscending.trace('w', main.updateMatlab)
+#		self.ArgumentPeriapsis.trace('w', main.updateMatlab)
+#		self.TrueAnomaly.trace('w', main.updateMatlab)
+#		self.attitudeX.trace('w', main.updateMatlab)
+#		self.attitudeY.trace('w', main.updateMatlab)
+#		self.attitudeZ.trace('w', main.updateMatlab)
 
 
 # The diagnostics part of the GUI
@@ -412,12 +447,14 @@ def listener(main):
 		main.queueData(data)
 		# Sends all data in sendData queue
 		# If simulink expects to receive data, you NEED to send data, hence why there's a 0 byte in case the send queue is empty
+		sentData = False
 		while not main.sendEmpty:
 			sendData = main.sendData()
 			if not sendData == None:
 				conn.sendall(bytes(sendData))
-			else:
-				conn.sendall(bytes(0))
+				sentData = True
+		if not sentData:
+			conn.sendAll(bytes(0))
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
