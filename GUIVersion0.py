@@ -257,15 +257,15 @@ class ControlPage(ttk.Frame):
 		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=15, columnspan=3)
 
 		# Setting up StringVar callbacks
-#		self.Eccentricity.trace('w', main.updateMatlab)
-#		self.SemiMajorAxis.trace('w', main.updateMatlab)
-#		self.Inclination.trace('w', main.updateMatlab)
-#		self.LongitudeAscending.trace('w', main.updateMatlab)
-#		self.ArgumentPeriapsis.trace('w', main.updateMatlab)
-#		self.TrueAnomaly.trace('w', main.updateMatlab)
-#		self.attitudeX.trace('w', main.updateMatlab)
-#		self.attitudeY.trace('w', main.updateMatlab)
-#		self.attitudeZ.trace('w', main.updateMatlab)
+		self.Eccentricity.trace('w', main.updateMatlab)
+		self.SemiMajorAxis.trace('w', main.updateMatlab)
+		self.Inclination.trace('w', main.updateMatlab)
+		self.LongitudeAscending.trace('w', main.updateMatlab)
+		self.ArgumentPeriapsis.trace('w', main.updateMatlab)
+		self.TrueAnomaly.trace('w', main.updateMatlab)
+		self.attitudeX.trace('w', main.updateMatlab)
+		self.attitudeY.trace('w', main.updateMatlab)
+		self.attitudeZ.trace('w', main.updateMatlab)
 
 
 # The diagnostics part of the GUI
@@ -432,10 +432,10 @@ def listener(main):
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.bind((HOST, DATAPORT))
 	s.listen(1)
-	# Accept connectoin
+	# Accept connection
 	conn, addr = s.accept()
 	# Prints connecting address
-	print ('Connected by ', addr)
+	print ('Connected by ', addr, ' for receiving data')
 	while 1:
 		data = conn.recv(256)
 		if not data: break
@@ -444,7 +444,22 @@ def listener(main):
 		print ('Received data of size ', len(data))
 		# Adds in data received from connection to the received data queue
 		main.addData(data)
-		main.queueData(data)
+	conn.close()
+
+#Sender sends data to MATLAB
+#It is important to keep in mind that if MATLAB expects to receive data and doesn't receive it, it will crash and stop the simulation
+#Therefore it is of upmost importance that this sends data fast and sends correctly formatted zero if there's no data, so that MATLAB won't bottleneck on receive
+SENDPORT = 50008
+def sender(main):
+	# Setting up socket, binding to address, listening for one connection
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.bind((HOST, SENDPORT))
+	s.listen(1)
+	# Accept connection
+	conn, addr = s.accept()
+	# Prints connecting address
+	print ('Connected by ', addr, ' for sending data')
+	while 1:
 		# Sends all data in sendData queue
 		# If simulink expects to receive data, you NEED to send data, hence why there's a 0 byte in case the send queue is empty
 		sentData = False
@@ -454,7 +469,7 @@ def listener(main):
 				conn.sendall(bytes(sendData))
 				sentData = True
 		if not sentData:
-			conn.sendAll(bytes(0))
+			conn.sendall(bytes(0))
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
@@ -518,10 +533,14 @@ disp = DisplayPage(main)
 
 main.loadSubFrames(ctrl,diag,disp)
 
-# Starting the listener and decoding threads
+# Starting the communication threads
 dataThread = threading.Thread(target=listener, args=(main, ))
 dataThread.daemon = True
 dataThread.start()
+
+sendThread = threading.Thread(target=sender, args=(main, ))
+sendThread.daemon = True
+sendThread.start()
 
 decodingThread = threading.Thread(target=dataDecoder, args=(main, ))
 decodingThread.daemon = True
