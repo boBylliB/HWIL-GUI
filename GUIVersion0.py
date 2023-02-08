@@ -98,18 +98,11 @@ class MainPage(ttk.Frame):
 		return self.queue.empty()
 
 	def updateMatlab(self, *args):
-		# Limit selfChanges from ever going below 0 if there's an error
-		if self.ctrl.selfChanges < 0:
-			self.ctrl.selfChanges = 0
-		# If selfChanges == 0, then the change was made by the user at runtime
-		if self.ctrl.selfChanges == 0:
-			# Build dataset in the same format as the received dataset
-			dataString = str(self.ctrl.Eccentricity.get()) + "," + str(self.ctrl.SemiMajorAxis.get()) + "," + str(self.ctrl.Inclination.get()) + "," + str(self.ctrl.LongitudeAscending.get()) + "," + str(self.ctrl.ArgumentPeriapsis.get()) + "," + str(self.ctrl.TrueAnomaly.get()) + "," + str(self.ctrl.attitudeX.get()) + "," + str(self.ctrl.attitudeY.get()) + "," + str(self.ctrl.attitudeZ.get())
-			# Convert to bytes and queue it
-			data = bytes(dataString)
-			queueData(data)
-		else:
-			self.ctrl.selfChanges -= 1
+		# Build dataset in the same format as the received dataset
+		dataString = str(self.ctrl.EccentricityEntry.get()) + "," + str(self.ctrl.SemiMajorAxisEntry.get()) + "," + str(self.ctrl.InclinationEntry.get()) + "," + str(self.ctrl.LongitudeAscendingEntry.get()) + "," + str(self.ctrl.ArgumentPeriapsisEntry.get()) + "," + str(self.ctrl.TrueAnomalyEntry.get()) + "," + str(self.ctrl.attitudeXEntry.get()) + "," + str(self.ctrl.attitudeYEntry.get()) + "," + str(self.ctrl.attitudeZEntry.get())
+		# Convert to bytes and queue it
+		data = bytes(dataString,'utf-8')
+		self.queueData(data)
 
 	# Adds received data to the queue
 	def queueData(self, data):
@@ -134,10 +127,21 @@ class ControlPage(ttk.Frame):
 		self.LongitudeAscending = StringVar()
 		self.ArgumentPeriapsis = StringVar()
 		self.TrueAnomaly = StringVar()
+		# Orbital Parameter Entries
+		self.EccentricityEntry = StringVar()
+		self.SemiMajorAxisEntry = StringVar()
+		self.InclinationEntry = StringVar()
+		self.LongitudeAscendingEntry = StringVar()
+		self.ArgumentPeriapsisEntry = StringVar()
+		self.TrueAnomalyEntry = StringVar()
 		# Attitude
 		self.attitudeX = StringVar()
 		self.attitudeY = StringVar()
 		self.attitudeZ = StringVar()
+		# Attitude Entries
+		self.attitudeXEntry = StringVar()
+		self.attitudeYEntry = StringVar()
+		self.attitudeZEntry = StringVar()
 		# Simulation Time
 		self.time = 0
 		self.displayTime = None
@@ -208,7 +212,6 @@ class ControlPage(ttk.Frame):
 
 	# Sets params for orbital stuff directly, just passes in all the variables
 	def setOrbitalParameters(self, Eccentricity, SemiMajorAxis, Inclination, LongitudeAscending, ArgumentPeriapsis, TrueAnomaly):
-		self.selfChanges += 6 # Ignore 6 StringVar changes
 		self.Eccentricity.set(Eccentricity)
 		self.SemiMajorAxis.set(SemiMajorAxis)
 		self.Inclination.set(Inclination)
@@ -218,10 +221,21 @@ class ControlPage(ttk.Frame):
 
 	# Sets the stored attitude of the satellite to given values
 	def setAttitude(self, attx, atty, attz):
-		self.selfChanges += 3 # Ignore 3 StringVar changes
 		self.attitudeX.set(attx)
 		self.attitudeY.set(atty)
 		self.attitudeZ.set(attz)
+
+	# Sets the labels to the current StringVar values
+	def updateLabels(self):
+		self.EccentricityLabel['text'] = 'Eccentricity = ' + self.Eccentricity.get()
+		self.SemiMajorAxisLabel['text'] = 'Semi-Major Axis = ' + self.SemiMajorAxis.get()
+		self.InclinationLabel['text'] = 'Inclination = ' + self.Inclination.get()
+		self.LongitudeAscendingLabel['text'] = 'Longitude of Ascending Node = ' + self.LongitudeAscending.get()
+		self.ArgumentPeriapsisLabel['text'] = 'Argument of Periapsis = ' + self.ArgumentPeriapsis.get()
+		self.TrueAnomalyLabel['text'] = 'True Anomaly = ' + self.TrueAnomaly.get()
+		self.attitudeXLabel['text'] = 'X = ' + self.attitudeX.get()
+		self.attitudeYLabel['text'] = 'Y = ' + self.attitudeY.get()
+		self.attitudeZLabel['text'] = 'Z = ' + self.attitudeZ.get()
 
 	# Initializes the control page of the GUI, building all of the buttons, labels, and entry fields
 	def load(self, main):
@@ -232,40 +246,32 @@ class ControlPage(ttk.Frame):
 		ttk.Label(self, text="").grid(column=0, row=1) # Spacer
 		# Orbital Parameters
 		ttk.Label(self, text="Orbital Parameters").grid(column=0, row=2, columnspan=3)
-		ttk.Label(self, text="Eccentricity = ").grid(column=0, row=3, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.Eccentricity).grid(column=2, row=3, sticky=W)
-		ttk.Label(self, text="Semi-Major Axis = ").grid(column=0, row=4, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.SemiMajorAxis).grid(column=2, row=4, sticky=W)
-		ttk.Label(self, text="Inclination = ").grid(column=0, row=5, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.Inclination).grid(column=2, row=5, sticky=W)
-		ttk.Label(self, text="Longitude of Ascending Node = ").grid(column=0, row=6, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.LongitudeAscending).grid(column=2, row=6, sticky=W)
-		ttk.Label(self, text="Argument of Periapsis = ").grid(column=0, row=7, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.ArgumentPeriapsis).grid(column=2, row=7, sticky=W)
-		ttk.Label(self, text="True Anomaly = ").grid(column=0, row=8, columnspan=2, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.TrueAnomaly).grid(column=2, row=8, sticky=W)
+		self.EccentricityLabel = ttk.Label(self, text="Eccentricity = N/A").grid(column=0, row=3, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.EccentricityEntry).grid(column=2, row=3, sticky=W)
+		self.SemiMajorAxisLabel = ttk.Label(self, text="Semi-Major Axis = N/A").grid(column=0, row=4, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.SemiMajorAxisEntry).grid(column=2, row=4, sticky=W)
+		self.InclinationLabel = ttk.Label(self, text="Inclination = N/A").grid(column=0, row=5, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.InclinationEntry).grid(column=2, row=5, sticky=W)
+		self.LongitudeAscendingLabel = ttk.Label(self, text="Longitude of Ascending Node = N/A").grid(column=0, row=6, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.LongitudeAscendingEntry).grid(column=2, row=6, sticky=W)
+		self.ArgumentPeriapsisLabel = ttk.Label(self, text="Argument of Periapsis = N/A").grid(column=0, row=7, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.ArgumentPeriapsisEntry).grid(column=2, row=7, sticky=W)
+		self.TrueAnomalyLabel = ttk.Label(self, text="True Anomaly = N/A").grid(column=0, row=8, columnspan=2, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.TrueAnomalyEntry).grid(column=2, row=8, sticky=W)
 		ttk.Label(self, text="").grid(column=0, row=9) # Spacer
-		# Attitude and Simulation Time
+		# Attitude
 		ttk.Label(self, text="Attitude").grid(column=0, row=10, columnspan=3)
-		ttk.Label(self, text="X = ").grid(column=1, row=11, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.attitudeX).grid(column=2, row=11, sticky=W)
-		ttk.Label(self, text="Y = ").grid(column=1, row=12, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.attitudeY).grid(column=2, row=12, sticky=W)
-		ttk.Label(self, text="Z = ").grid(column=1, row=13, sticky=E)
-		ttk.Entry(self, width=10, textvariable=self.attitudeZ).grid(column=2, row=13, sticky=W)
+		self.attitudeXLabel = ttk.Label(self, text="X = N/A").grid(column=1, row=11, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.attitudeXEntry).grid(column=2, row=11, sticky=W)
+		self.attitudeYLabel = ttk.Label(self, text="Y = N/A").grid(column=1, row=12, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.attitudeYEntry).grid(column=2, row=12, sticky=W)
+		self.attitudeZLabel = ttk.Label(self, text="Z = N/A").grid(column=1, row=13, sticky=E)
+		ttk.Entry(self, width=10, textvariable=self.attitudeZEntry).grid(column=2, row=13, sticky=W)
 		ttk.Label(self, text="").grid(column=0, row=14) # Spacer
-		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=15, columnspan=3)
-
-		# Setting up StringVar callbacks
-		self.Eccentricity.trace('w', main.updateMatlab)
-		self.SemiMajorAxis.trace('w', main.updateMatlab)
-		self.Inclination.trace('w', main.updateMatlab)
-		self.LongitudeAscending.trace('w', main.updateMatlab)
-		self.ArgumentPeriapsis.trace('w', main.updateMatlab)
-		self.TrueAnomaly.trace('w', main.updateMatlab)
-		self.attitudeX.trace('w', main.updateMatlab)
-		self.attitudeY.trace('w', main.updateMatlab)
-		self.attitudeZ.trace('w', main.updateMatlab)
+		# Update button
+		ttk.Button(self, text="Update Matlab", command=main.updateMatlab).grid(column=1, row=15, columnspan=2)
+		ttk.Label(self, text="").grid(column=0, row=16) # Spacer
+		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=17, columnspan=3)
 
 
 # The diagnostics part of the GUI
@@ -441,7 +447,7 @@ def listener(main):
 		if not data: break
 		# If this returns anything other than 256, bad things happen
 		# Can potentially change the size of data received, but 256 is relatively standard and should be enough for now
-		print ('Received data of size ', len(data))
+		#print ('Received data of size ', len(data))
 		# Adds in data received from connection to the received data queue
 		main.addData(data)
 	conn.close()
@@ -459,17 +465,21 @@ def sender(main):
 	conn, addr = s.accept()
 	# Prints connecting address
 	print ('Connected by ', addr, ' for sending data')
+	endChar = bytes('|','utf-8')
 	while 1:
 		# Sends all data in sendData queue
-		# If simulink expects to receive data, you NEED to send data, hence why there's a 0 byte in case the send queue is empty
+		# If simulink expects to receive data, you NEED to send data, hence why there's a default message in case the send queue is empty
 		sentData = False
 		while not main.sendEmpty:
 			sendData = main.sendData()
 			if not sendData == None:
 				conn.sendall(bytes(sendData))
+				conn.sendall(endChar)
+				print ('sending ', sendData)
 				sentData = True
 		if not sentData:
-			conn.sendall(bytes(0))
+			conn.sendall(bytes('No Change','utf-8'))
+			conn.sendall(endChar)
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
@@ -493,7 +503,7 @@ def videoListener(main):
 	while 1:
 		data = conn.recv(READSIZE)
 		if not data: break
-		print ('Received video data of size ', len(data))
+		#print ('Received video data of size ', len(data))
 		main.addVideoData(data)
 	conn.close()
 
@@ -505,7 +515,7 @@ def dataDecoder(main):
 		if not main.empty:
 			data = main.getData()
 			if not data == None and len(data)==256:
-				print('Decoding data: ', data)
+				#print('Decoding data: ', data)
 				time, ecc, smaxis, inc, longasc, argper, tanom, attx, atty, attz, mode, sunex, powgen, powdraw, batv, batc, world, excess = str(data).split(',')
 				main.ctrl.setTime(float(time.replace('b','').replace('\'','')))
 				main.ctrl.setOrbitalParameters(float(ecc), float(smaxis), float(inc), float(longasc), float(argper), float(tanom))
