@@ -10,6 +10,7 @@ import datetime
 import threading
 import socket
 import csv
+import time
 
 # class for the GUI itself
 # holds each section of the GUI within itself, and acts to bridge the gap and hold utility functions
@@ -456,6 +457,7 @@ def listener(main):
 #It is important to keep in mind that if MATLAB expects to receive data and doesn't receive it, it will crash and stop the simulation
 #Therefore it is of upmost importance that this sends data fast and sends correctly formatted zero if there's no data, so that MATLAB won't bottleneck on receive
 SENDPORT = 50008
+SENDDELAY = 0.15 # Minimum delay in seconds between sent data
 def sender(main):
 	# Setting up socket, binding to address, listening for one connection
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -480,6 +482,7 @@ def sender(main):
 		if not sentData:
 			conn.sendall(bytes('No Change','utf-8'))
 			conn.sendall(endChar)
+		time.sleep(SENDDELAY)
 	conn.close()
 
 #VideoListener pulls in video data specifically from MATLAB
