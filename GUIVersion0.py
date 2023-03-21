@@ -12,6 +12,7 @@ import socket
 import csv
 import time
 
+# FINISHED
 # class for the GUI itself
 # holds each section of the GUI within itself, and acts to bridge the gap and hold utility functions
 class MainPage(ttk.Frame):
@@ -116,6 +117,7 @@ class MainPage(ttk.Frame):
 			return self.sendQueue.get()
 		self.sendEmpty = self.sendQueue.empty()
 
+# FINISHED
 # The control part of the GUI
 # Used for entering initial values and controlling the simulation from the GUI
 class ControlPage(ttk.Frame):
@@ -274,7 +276,7 @@ class ControlPage(ttk.Frame):
 		ttk.Label(self, text="").grid(column=0, row=16) # Spacer
 		self.timeLabel = ttk.Label(self, text="Runtime: 0 seconds").grid(column=0, row=17, columnspan=3)
 
-
+# FINISHED
 # The diagnostics part of the GUI
 # Used for viewing relevant data and statistics while the simulation is running
 class DiagnosticsPage(ttk.Frame):
@@ -338,7 +340,8 @@ class DiagnosticsPage(ttk.Frame):
 		ctrl.Control_csv()
 		ctrl.Attitude_csv()
 		self.Diagnostics_csv()
-	
+
+# TODO: DisplayPage Class file
 # The video part of the GUI
 # Used for reading in and displaying the animation sent directly from simulink
 HEIGHT, WIDTH = 600, 600
@@ -431,6 +434,8 @@ class DisplayPage(ttk.Frame):
 		else:
 			self.imageLabel.configure(image = self.image)
 
+
+# TODO: This should be in the data class
 #Listener pulls in data from MATLAB
 # 'localhost' should be changed to whatever address that needs to be accessed, has the port 50007
 HOST, DATAPORT = 'localhost', 50007
@@ -529,7 +534,8 @@ def dataDecoder(main):
 				main.diag.setPowerDraw(float(powdraw))
 				main.diag.setVoltage(float(batv))
 				main.diag.setChargePercent(float(batc))
-			
+
+# TODO: This should be put into main.py
 # Pretty standard GUI setup, similar to most other tkinter GUIs
 root = Tk()
 root.title("EagleSat Simulation Interface") # Set the window title
