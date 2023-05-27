@@ -1,0 +1,20 @@
+SWISH = SoftWare Integrated with Solar Hardware
+	Simulation With Integrated Solar Hardware
+
+Ursagryph = HWIL = SIMS V0.1 = SIMS Prototype
+- Initial design for SIMS, and initial concept
+- Good to document as lineage/history
+SWISH = SIMS V1.0 = SIMS Initial Release
+- First full SIMS design, and first fully working model, feature updates will be V1.1, V1.2, etc.
+- Name specifies Solar Hardware as that is really the only major hardware integrated so far
+??? = SIMS V2.0 = SIMS Expanded Release
+- Next full SIMS design, feature updates will be V2.1, V2.2, etc.
+- V1 -> V2 will indicate some kind of major model update or rework, TBD
+- Examples may include:
+  - New integrated hardware system
+  - New entire subsystem added to the integrated software system
+  - New satellite system modelled somewhere in the simulation
+- The acronym for this should be decided by the engineers who design the major upgrade
+  - Obviously way out of my control, but would be cool if this becomes a thing down the line
+  - Would be a cool "tradition" to have each major update come with a new acronym
+  - This acronym would be chosen either at conception of the full idea or announced with the release
