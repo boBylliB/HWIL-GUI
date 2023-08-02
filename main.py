@@ -1,7 +1,7 @@
 """
 Main function for the HWIL GUI
 """
-
+import Network
 # Tkinter imports
 from tkinter import Tk
 
